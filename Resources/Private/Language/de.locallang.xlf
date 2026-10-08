@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:oidc_connect/Resources/Private/Language/locallang.xlf" product-name="oidc_connect">
+		<body>
+			<trans-unit id="backend.login.tab"><source>Single Sign-On</source><target>Single Sign-On</target></trans-unit>
+			<trans-unit id="backend.login.hint"><source>Sign in with your organisation account.</source><target>Melden Sie sich mit Ihrem Organisationskonto an.</target></trans-unit>
+			<trans-unit id="backend.login.error.headline"><source>Sign-in failed</source><target>Anmeldung fehlgeschlagen</target></trans-unit>
+			<trans-unit id="error.generic"><source>The sign-in could not be completed. Please try again.</source><target>Die Anmeldung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.</target></trans-unit>
+			<trans-unit id="error.not_configured"><source>Single sign-on is not configured for the backend.</source><target>Single Sign-On ist für das Backend nicht eingerichtet.</target></trans-unit>
+			<trans-unit id="error.not_authorized"><source>Your account is not authorized for the TYPO3 backend.</source><target>Ihr Konto ist für das TYPO3-Backend nicht freigeschaltet.</target></trans-unit>
+			<trans-unit id="error.provider_unavailable"><source>The sign-in service is currently not available.</source><target>Der Anmeldedienst ist derzeit nicht erreichbar.</target></trans-unit>
+			<trans-unit id="error.state_invalid"><source>The sign-in took too long or was started in another browser. Please try again.</source><target>Die Anmeldung hat zu lange gedauert oder wurde in einem anderen Browser begonnen. Bitte versuchen Sie es erneut.</target></trans-unit>
+			<trans-unit id="error.provider_error"><source>The sign-in service refused the request.</source><target>Der Anmeldedienst hat die Anfrage abgelehnt.</target></trans-unit>
+			<trans-unit id="error.login_required"><source>Please sign in.</source><target>Bitte melden Sie sich an.</target></trans-unit>
+			<trans-unit id="button.login"><source>Log in</source><target>Anmelden</target></trans-unit>
+			<trans-unit id="button.logout"><source>Log out</source><target>Abmelden</target></trans-unit>
+		</body>
+	</file>
+</xliff>

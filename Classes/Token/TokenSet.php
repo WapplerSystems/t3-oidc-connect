@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WapplerSystems\OidcConnect\Authentication;
+namespace WapplerSystems\OidcConnect\Token;
 
 /**
  * The token response returned by an IdP's token endpoint after a

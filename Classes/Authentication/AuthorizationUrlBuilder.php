@@ -5,130 +5,85 @@ declare(strict_types=1);
 namespace WapplerSystems\OidcConnect\Authentication;
 
 use WapplerSystems\OidcConnect\Configuration\OidcConnectSettings;
-use WapplerSystems\OidcConnect\Discovery\WellKnownClient;
+use WapplerSystems\OidcConnect\Discovery\ProviderMetadata;
 
 /**
- * Builds an OpenID Connect Authorization Code Flow request URL.
- *
- * - Authorization Code Flow with PKCE (S256) by default.
- * - Resolves the authorization endpoint from
- *     1) `oidcConnect.endpoints.authorization` if set, else
- *     2) the discovery document at `<issuer>/.well-known/openid-configuration`.
- * - Generates cryptographically random `state`, `nonce` and PKCE
- *   `code_verifier` (RFC 7636: 43 chars, base64url-safe).
- *
- * Side-effect-free: returns an {@see AuthorizationRequest} value object.
- * Persistence of `state` + `code_verifier` for the callback exchange is
- * the caller's job.
+ * Builds the authorization request URL (Authorization Code Flow, PKCE S256
+ * always on, RFC 9700 §2.1.1) together with the state record that has to be
+ * persisted for the callback.
  */
-final readonly class AuthorizationUrlBuilder
+final class AuthorizationUrlBuilder
 {
-    public function __construct(
-        private WellKnownClient $discovery,
-    ) {}
-
     /**
-     * @param string|null               $redirectUri   Absolute URL of the OIDC callback on this site.
-     *                                                 Falls back to `$settings->redirectUri()` and
-     *                                                 throws if neither is provided.
-     * @param string|null               $idpLanguage   2-char language code passed to the IdP via
-     *                                                 the parameter name configured in
-     *                                                 `oidcConnect.auth.authorizeLanguageParameter`.
-     * @param array<string, string>     $extraParams   Additional query params to merge into the URL
-     *                                                 (e.g. `prompt=login`, `login_hint=...`).
+     * @param array<string, string> $extraParameters e.g. login_hint, kc_action
+     * @return array{url: string, record: AuthorizationStateRecord}
      */
     public function build(
         OidcConnectSettings $settings,
-        ?string $redirectUri = null,
-        ?string $idpLanguage = null,
-        array $extraParams = [],
-    ): AuthorizationRequest {
-        $redirectUri = $redirectUri ?? $settings->redirectUri();
-        if ($redirectUri === '') {
-            throw new \LogicException(
-                'oidc-connect: no redirect URI given. Pass one to build() or set oidcConnect.redirectUri.'
-            );
-        }
+        ProviderMetadata $metadata,
+        string $redirectUri,
+        string $loginType,
+        string $returnUrl,
+        string $browserBindingValue,
+        ?string $languageCode = null,
+        bool $silent = false,
+        array $extraParameters = [],
+    ): array {
+        $state = self::randomToken();
+        $nonce = self::randomToken();
+        $codeVerifier = self::randomToken(64);
 
-        $clientId = $settings->clientId();
-        if ($clientId === '') {
-            throw new \LogicException('oidc-connect: oidcConnect.clientId is empty.');
-        }
-
-        $authorizationEndpoint = $this->resolveAuthorizationEndpoint($settings);
-        if ($authorizationEndpoint === '') {
-            throw new \LogicException(
-                'oidc-connect: could not determine authorization endpoint (no override, discovery failed).'
-            );
-        }
-
-        $state = $this->randomToken();
-        $nonce = $this->randomToken();
-
-        $params = [
+        $parameters = [
             'response_type' => 'code',
-            'client_id'     => $clientId,
-            'redirect_uri'  => $redirectUri,
-            'scope'         => implode(' ', $settings->scopes() ?: ['openid']),
-            'state'         => $state,
-            'nonce'         => $nonce,
+            'client_id' => $settings->clientId(),
+            'redirect_uri' => $redirectUri,
+            'scope' => implode(' ', $settings->scopes()),
+            'state' => $state,
+            'nonce' => $nonce,
+            'code_challenge' => rtrim(strtr(base64_encode(hash('sha256', $codeVerifier, true)), '+/', '-_'), '='),
+            'code_challenge_method' => 'S256',
         ];
-
-        $codeVerifier = null;
-        $codeChallenge = null;
-        $codeChallengeMethod = null;
-        if ($settings->isPkceEnabled()) {
-            $codeVerifier = $this->randomToken(64); // 64 bytes -> ~86 base64url chars (well within RFC 7636 limits)
-            $codeChallenge = rtrim(strtr(base64_encode(hash('sha256', $codeVerifier, true)), '+/', '-_'), '=');
-            $codeChallengeMethod = 'S256';
-            $params['code_challenge'] = $codeChallenge;
-            $params['code_challenge_method'] = $codeChallengeMethod;
+        if ($silent) {
+            $parameters['prompt'] = 'none';
         }
-
-        if ($idpLanguage !== null && $idpLanguage !== '') {
-            $paramName = $settings->authorizeLanguageParameter();
-            if ($paramName !== '') {
-                $params[$paramName] = $idpLanguage;
+        if ($languageCode !== null && $languageCode !== '') {
+            foreach (array_filter(array_map('trim', explode(',', $settings->languageParameter()))) as $name) {
+                $parameters[$name] = $languageCode;
+            }
+        }
+        if ($settings->idpHint() !== '') {
+            $parameters['kc_idp_hint'] = $settings->idpHint();
+        }
+        foreach ($extraParameters as $name => $value) {
+            if (!isset($parameters[$name]) && $value !== '') {
+                $parameters[$name] = $value;
             }
         }
 
-        foreach ($extraParams as $k => $v) {
-            $params[(string)$k] = (string)$v;
-        }
+        $endpoint = $metadata->authorizationEndpoint;
+        $url = $endpoint . (str_contains($endpoint, '?') ? '&' : '?') . http_build_query($parameters, '', '&', PHP_QUERY_RFC3986);
 
-        $url = $authorizationEndpoint
-            . (str_contains($authorizationEndpoint, '?') ? '&' : '?')
-            . http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-
-        return new AuthorizationRequest(
-            url: $url,
-            state: $state,
-            nonce: $nonce,
-            codeVerifier: $codeVerifier,
-            codeChallenge: $codeChallenge,
-            codeChallengeMethod: $codeChallengeMethod,
-            redirectUri: $redirectUri,
-        );
-    }
-
-    private function resolveAuthorizationEndpoint(OidcConnectSettings $settings): string
-    {
-        $override = $settings->endpoint('authorization');
-        if ($override !== '') {
-            return $override;
-        }
-        $issuer = $settings->issuer();
-        if ($issuer === '') {
-            return '';
-        }
-        return $this->discovery->discover($issuer)->authorizationEndpoint();
+        return [
+            'url' => $url,
+            'record' => new AuthorizationStateRecord(
+                state: $state,
+                nonce: $nonce,
+                codeVerifier: $codeVerifier,
+                redirectUri: $redirectUri,
+                loginType: $loginType,
+                siteIdentifier: $settings->siteIdentifier(),
+                returnUrl: $returnUrl,
+                silent: $silent,
+                browserBindingHash: hash('sha256', $browserBindingValue),
+                createdAt: time(),
+            ),
+        ];
     }
 
     /**
-     * Cryptographically secure random token, encoded base64url without
-     * padding. 32 bytes by default → 43 url-safe chars.
+     * Cryptographically random base64url token (32 bytes → 43 chars).
      */
-    private function randomToken(int $bytes = 32): string
+    public static function randomToken(int $bytes = 32): string
     {
         return rtrim(strtr(base64_encode(random_bytes($bytes)), '+/', '-_'), '=');
     }

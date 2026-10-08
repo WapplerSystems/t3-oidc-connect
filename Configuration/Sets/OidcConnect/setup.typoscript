@@ -1,0 +1,15 @@
+# Login / logout button content element. Kept independent of
+# fluid_styled_content's lib.contentElement so it works with any theme.
+# Uncached (COA_INT): it shows ?oidc_error messages, which are not part of
+# the page cache identifier.
+tt_content.oidcconnect_loginbutton = COA_INT
+tt_content.oidcconnect_loginbutton.10 = FLUIDTEMPLATE
+tt_content.oidcconnect_loginbutton.10 {
+  templateName = LoginButton
+  templateRootPaths {
+    0 = EXT:oidc_connect/Resources/Private/Templates/ContentElements/
+  }
+  partialRootPaths {
+    0 = EXT:oidc_connect/Resources/Private/Partials/
+  }
+}

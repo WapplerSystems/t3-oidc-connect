@@ -1,0 +1,23 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:oidc="http://typo3.org/ns/WapplerSystems/OidcConnect/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+<div class="tx-oidcconnect">
+    <f:if condition="{data.header}">
+        <h2>{data.header}</h2>
+    </f:if>
+    <f:if condition="{oidc:requestParameter(name: 'oidc_error')}">
+        <div class="alert alert-danger" role="alert">
+            <f:translate key="LLL:EXT:oidc_connect/Resources/Private/Language/locallang.xlf:error.{oidc:requestParameter(name: 'oidc_error')}"
+                         default="{f:translate(key: 'LLL:EXT:oidc_connect/Resources/Private/Language/locallang.xlf:error.generic')}" />
+        </div>
+    </f:if>
+    <f:security.ifAuthenticated>
+        <f:then>
+            <a class="btn btn-primary" href="{oidc:logoutUrl()}"><f:translate key="LLL:EXT:oidc_connect/Resources/Private/Language/locallang.xlf:button.logout" /></a>
+        </f:then>
+        <f:else>
+            <a class="btn btn-primary" href="{oidc:loginUrl()}" rel="nofollow"><f:translate key="LLL:EXT:oidc_connect/Resources/Private/Language/locallang.xlf:button.login" /></a>
+        </f:else>
+    </f:security.ifAuthenticated>
+</div>
+</html>

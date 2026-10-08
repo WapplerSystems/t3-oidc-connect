@@ -11,24 +11,14 @@ use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Http\RequestFactory;
 
 /**
- * Loads + caches the OpenID Connect Discovery document for an issuer.
- *
- * The well-known location is `<issuer>/.well-known/openid-configuration`
- * (RFC 8414). Discovery documents are practically static — projects can
- * skip configuring individual endpoint URLs in `oidcConnect.endpoints.*`
- * and rely on auto-discovery. Endpoint overrides from the site settings
- * always win over the discovery document (see
- * {@see \WapplerSystems\OidcConnect\Configuration\OidcConnectSettings::endpoint()}).
- *
- * Errors during fetch (network, non-2xx, invalid JSON) bubble up as
- * {@see DiscoveryException} so callers can decide whether to fall back
- * to manual endpoints or surface the failure.
+ * Loads and caches the OpenID Connect discovery document of an issuer and
+ * verifies that it really describes that issuer (OIDC Discovery §4.3).
  */
 final class WellKnownClient implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    private const CACHE_TTL = 3600; // 1 h — discovery docs rarely change
+    private const CACHE_TTL = 86400;
 
     public function __construct(
         private readonly RequestFactory $requestFactory,
@@ -37,19 +27,16 @@ final class WellKnownClient implements LoggerAwareInterface
     ) {}
 
     /**
-     * Fetch the discovery document for the given issuer. Result is cached
-     * by hash of the issuer URL.
-     *
-     * @throws DiscoveryException on network/parse failure
+     * @throws DiscoveryException
      */
     public function discover(string $issuer): OidcDiscoveryDocument
     {
         $issuer = rtrim($issuer, '/');
         if ($issuer === '') {
-            throw new DiscoveryException('Empty issuer URL.');
+            throw new DiscoveryException('Empty issuer URL.', 1747400000);
         }
 
-        $cacheKey = 'wellknown_' . hash('sha256', $issuer);
+        $cacheKey = $this->cacheKey($issuer);
         $cached = $this->cache->get($cacheKey);
         if (is_array($cached)) {
             return new OidcDiscoveryDocument($cached);
@@ -60,54 +47,52 @@ final class WellKnownClient implements LoggerAwareInterface
             $response = $this->requestFactory->request($url, 'GET', [
                 'headers' => ['Accept' => 'application/json'],
                 'timeout' => 10,
+                'http_errors' => false,
             ]);
         } catch (\Throwable $e) {
             $this->logger?->error('oidc-connect: discovery fetch failed for {issuer}: {error}', [
                 'issuer' => $issuer,
                 'error' => $e->getMessage(),
             ]);
-            throw new DiscoveryException(
-                sprintf('Could not fetch discovery document from %s: %s', $url, $e->getMessage()),
-                1747400001,
-                $e
-            );
+            throw new DiscoveryException(sprintf('Could not fetch %s: %s', $url, $e->getMessage()), 1747400001, $e);
         }
 
         $status = $response->getStatusCode();
         if ($status < 200 || $status >= 300) {
-            throw new DiscoveryException(
-                sprintf('Discovery endpoint %s returned HTTP %d.', $url, $status),
-                1747400002
-            );
+            throw new DiscoveryException(sprintf('Discovery endpoint %s returned HTTP %d.', $url, $status), 1747400002);
         }
 
-        $body = (string)$response->getBody();
         try {
-            $decoded = json_decode($body, true, 32, JSON_THROW_ON_ERROR);
+            $decoded = json_decode((string)$response->getBody(), true, 32, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            throw new DiscoveryException(
-                sprintf('Discovery document at %s is not valid JSON: %s', $url, $e->getMessage()),
-                1747400003,
-                $e
-            );
+            throw new DiscoveryException(sprintf('Discovery document at %s is not valid JSON: %s', $url, $e->getMessage()), 1747400003, $e);
         }
         if (!is_array($decoded)) {
             throw new DiscoveryException(sprintf('Discovery document at %s is not a JSON object.', $url), 1747400004);
         }
 
-        $this->cache->set($cacheKey, $decoded, [], self::CACHE_TTL);
-        return new OidcDiscoveryDocument($decoded);
+        $document = new OidcDiscoveryDocument($decoded);
+        if (rtrim($document->issuer(), '/') !== $issuer) {
+            throw new DiscoveryException(
+                sprintf('Discovery document at %s announces issuer "%s", expected "%s".', $url, $document->issuer(), $issuer),
+                1747400005
+            );
+        }
+
+        $this->cache->set($cacheKey, $decoded, ['oidc_connect_discovery'], self::CACHE_TTL);
+        return $document;
     }
 
-    /**
-     * Invalidate the cached discovery document for an issuer. Useful in
-     * tests or when an admin rotates IdP endpoints.
-     */
     public function forget(string $issuer): void
     {
         $issuer = rtrim($issuer, '/');
         if ($issuer !== '') {
-            $this->cache->remove('wellknown_' . hash('sha256', $issuer));
+            $this->cache->remove($this->cacheKey($issuer));
         }
+    }
+
+    private function cacheKey(string $issuer): string
+    {
+        return 'wellknown_' . hash('sha256', $issuer);
     }
 }

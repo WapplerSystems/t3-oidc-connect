@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" target-language="de" datatype="plaintext" original="EXT:oidc_connect/Resources/Private/Language/locallang_db.xlf" product-name="oidc_connect">
+		<body>
+			<trans-unit id="users.tab"><source>Single Sign-On</source><target>Single Sign-On</target></trans-unit>
+			<trans-unit id="users.palette"><source>OpenID Connect identity</source><target>OpenID-Connect-Identität</target></trans-unit>
+			<trans-unit id="users.tx_oidcconnect_issuer"><source>Issuer</source><target>Aussteller (Issuer)</target></trans-unit>
+			<trans-unit id="users.tx_oidcconnect_subject"><source>Subject (sub)</source><target>Subjekt (sub)</target></trans-unit>
+			<trans-unit id="users.tx_oidcconnect_subject.description"><source>Set automatically on the first single sign-on login. Clear both fields to unlink the account.</source><target>Wird beim ersten Single-Sign-On-Login automatisch gesetzt. Beide Felder leeren, um die Verknüpfung zu lösen.</target></trans-unit>
+			<trans-unit id="ce.loginbutton.title"><source>Login / logout button (SSO)</source><target>Anmelde-/Abmeldebutton (SSO)</target></trans-unit>
+			<trans-unit id="ce.loginbutton.description"><source>Shows a single sign-on login button, or a logout button for logged-in users.</source><target>Zeigt einen Single-Sign-On-Anmeldebutton bzw. für angemeldete Benutzer einen Abmeldebutton.</target></trans-unit>
+		</body>
+	</file>
+</xliff>

@@ -6,19 +6,7 @@ services:
 
   WapplerSystems\OidcConnect\:
     resource: '../Classes/*'
-    exclude: '../Classes/{Domain/Model,Domain/Dto}'
 
-  # The settings factory is intentionally public so application code outside
-  # of DI (e.g. middlewares constructed by TYPO3 core) can grab it via
-  # GeneralUtility::makeInstance() during the early bootstrap phase.
-  WapplerSystems\OidcConnect\Configuration\OidcConnectSettingsFactory:
-    public: true
-
-  WapplerSystems\OidcConnect\Authentication\AuthorizationUrlBuilder:
-    public: true
-
-  # Dedicated cache for OIDC discovery documents + short-lived state records.
-  # Backend is configured in ext_localconf.php via cacheConfigurations.
   cache.oidc_connect:
     class: TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
     factory: ['@TYPO3\CMS\Core\Cache\CacheManager', 'getCache']
@@ -26,7 +14,12 @@ services:
 
   WapplerSystems\OidcConnect\Authentication\AuthorizationStateStoreInterface:
     alias: WapplerSystems\OidcConnect\Authentication\CacheBackedAuthorizationStateStore
-    public: true
 
-  WapplerSystems\OidcConnect\Authentication\CacheBackedAuthorizationStateStore:
+  # Fetched via GeneralUtility::makeInstance() from the authentication
+  # service, which the core instantiates outside of DI.
+  WapplerSystems\OidcConnect\Configuration\OidcConnectSettingsFactory:
+    public: true
+  WapplerSystems\OidcConnect\User\UserProvisioner:
+    public: true
+  WapplerSystems\OidcConnect\Session\LogoutContext:
     public: true

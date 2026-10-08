@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-namespace WapplerSystems\OidcConnect\Authentication;
+namespace WapplerSystems\OidcConnect\Token;
 
 class TokenExchangeException extends \RuntimeException {}

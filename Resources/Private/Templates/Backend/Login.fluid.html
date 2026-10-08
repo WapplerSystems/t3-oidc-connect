@@ -1,0 +1,14 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="Login" />
+
+<f:section name="loginFormFields">
+    <f:if condition="{oidcError}">
+        <div class="alert alert-danger" id="t3-login-error">
+            <strong><f:translate key="LLL:EXT:oidc_connect/Resources/Private/Language/locallang.xlf:backend.login.error.headline" /></strong>
+            <p><f:translate key="LLL:EXT:oidc_connect/Resources/Private/Language/locallang.xlf:error.{oidcError}" default="{f:translate(key: 'LLL:EXT:oidc_connect/Resources/Private/Language/locallang.xlf:error.generic')}" /></p>
+        </div>
+    </f:if>
+    <p class="text-center"><f:translate key="LLL:EXT:oidc_connect/Resources/Private/Language/locallang.xlf:backend.login.hint" /></p>
+    <input type="hidden" name="oidc_connect" value="1" />
+</f:section>
+</html>

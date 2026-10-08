@@ -5,38 +5,55 @@ declare(strict_types=1);
 namespace WapplerSystems\OidcConnect\Authentication;
 
 /**
- * Server-side record persisted between the authorization redirect and the
- * OIDC callback. Lifetime is short (default 10 min) — once consumed it
- * MUST be deleted to prevent replay.
+ * Server-side record of one in-flight authorization request, persisted
+ * between the redirect to the provider and the callback. Single use.
  *
- * `cookieTokenHash` is the optional defensive binding to a single browser:
- * the middleware sets a HTTPOnly+SameSite=Lax cookie with a random token
- * and stores `hash('sha256', $token)` here. On callback the cookie value
- * is re-hashed and compared via {@see verifyCookieToken()}. With this
- * binding in place, knowing the URL `state` alone (e.g. by leaking a
- * Referer) is not enough to forge a callback.
+ * `browserBindingHash` is the sha256 of a random value stored in an
+ * HttpOnly cookie when the flow starts: knowing `state` alone (e.g. from a
+ * leaked Referer) is not enough to complete someone else's login.
  */
 final readonly class AuthorizationStateRecord
 {
     public function __construct(
         public string $state,
         public string $nonce,
-        public ?string $codeVerifier,
-        public string $redirectUri,             // where the IdP returns to (the OIDC callback URL)
-        public string $redirectAfterLogin = '', // where we send the user once we've created the session
+        public string $codeVerifier,
+        public string $redirectUri,
+        public string $loginType = 'FE',
         public string $siteIdentifier = '',
-        public string $cookieTokenHash = '',
+        public string $returnUrl = '',
+        public bool $silent = false,
+        public string $browserBindingHash = '',
         public int $createdAt = 0,
     ) {}
 
-    /**
-     * @return true if no cookie binding was enforced or the supplied token matches.
-     */
-    public function verifyCookieToken(string $cookieToken): bool
+    public function matchesBrowser(string $bindingValue): bool
     {
-        if ($this->cookieTokenHash === '') {
-            return true;
-        }
-        return hash_equals($this->cookieTokenHash, hash('sha256', $cookieToken));
+        return $this->browserBindingHash !== ''
+            && $bindingValue !== ''
+            && hash_equals($this->browserBindingHash, hash('sha256', $bindingValue));
+    }
+
+    /** @return array<string, mixed> */
+    public function toArray(): array
+    {
+        return get_object_vars($this);
+    }
+
+    /** @param array<string, mixed> $data */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            state: (string)($data['state'] ?? ''),
+            nonce: (string)($data['nonce'] ?? ''),
+            codeVerifier: (string)($data['codeVerifier'] ?? ''),
+            redirectUri: (string)($data['redirectUri'] ?? ''),
+            loginType: (string)($data['loginType'] ?? 'FE'),
+            siteIdentifier: (string)($data['siteIdentifier'] ?? ''),
+            returnUrl: (string)($data['returnUrl'] ?? ''),
+            silent: (bool)($data['silent'] ?? false),
+            browserBindingHash: (string)($data['browserBindingHash'] ?? ''),
+            createdAt: (int)($data['createdAt'] ?? 0),
+        );
     }
 }

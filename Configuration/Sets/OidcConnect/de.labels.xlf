@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="de" datatype="plaintext" original="EXT:oidc_connect/Configuration/Sets/OidcConnect/labels.xlf" product-name="oidc_connect">
+        <header/>
+        <body>
+            <trans-unit id="categories.oidcConnect">
+                <source>OIDC Connect</source>
+                <target>OIDC Connect</target>
+            </trans-unit>
+            <trans-unit id="categories.oidcConnect.connection">
+                <source>Connection</source>
+                <target>Verbindung</target>
+            </trans-unit>
+            <trans-unit id="categories.oidcConnect.auth">
+                <source>Authentication behaviour</source>
+                <target>Authentifizierungsverhalten</target>
+            </trans-unit>
+            <trans-unit id="categories.oidcConnect.users">
+                <source>Frontend user provisioning</source>
+                <target>Frontend-Benutzerbereitstellung</target>
+            </trans-unit>
+            <trans-unit id="categories.oidcConnect.ui">
+                <source>User interface</source>
+                <target>Benutzeroberfläche</target>
+            </trans-unit>
+            <trans-unit id="categories.oidcConnect.backend">
+                <source>Backend login</source>
+                <target>Backend-Anmeldung</target>
+            </trans-unit>
+            <trans-unit id="categories.oidcConnect.routes">
+                <source>Routes</source>
+                <target>Routen</target>
+            </trans-unit>
+            <trans-unit id="categories.oidcConnect.endpoints">
+                <source>Endpoint overrides</source>
+                <target>Endpunkt-Überschreibungen</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.issuer">
+                <source>Issuer URL</source>
+                <target>Issuer-URL</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.issuer">
+                <source>Base URL of the OpenID Connect provider. TYPO3 resolves the discovery document from &lt;issuer&gt;/.well-known/openid-configuration unless endpoint overrides are set.</source>
+                <target>Basis-URL des OpenID-Connect-Anbieters. TYPO3 lädt das Discovery-Dokument von &lt;issuer&gt;/.well-known/openid-configuration, sofern keine Endpunkt-Überschreibungen gesetzt sind.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.clientId">
+                <source>Client ID</source>
+                <target>Client-ID</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.clientId">
+                <source>Client identifier registered at the provider. Required for the authorization code flow.</source>
+                <target>Client-Kennung, die beim Anbieter registriert ist. Erforderlich für den Authorization-Code-Flow.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.clientSecretEnv">
+                <source>Client secret environment variable</source>
+                <target>Umgebungsvariable für Client-Secret</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.clientSecretEnv">
+                <source>Name of the environment variable that holds the client secret. Leave empty to use OIDC_CONNECT_&lt;SITE&gt;_CLIENT_SECRET. The secret itself is never stored in site settings.</source>
+                <target>Name der Umgebungsvariable, die das Client-Secret enthält. Leer lassen, um OIDC_CONNECT_&lt;SITE&gt;_CLIENT_SECRET zu verwenden. Das Secret selbst wird niemals in den Site-Einstellungen gespeichert.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.scopes">
+                <source>Scopes</source>
+                <target>Scopes</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.scopes">
+                <source>Scopes requested during authorization. Defaults to openid, email and profile; at least openid is required for OIDC.</source>
+                <target>Scopes, die bei der Autorisierung angefordert werden. Standard: openid, email und profile; mindestens openid ist für OIDC erforderlich.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.tokenEndpointAuthMethod">
+                <source>Token endpoint auth method</source>
+                <target>Token-Endpunkt-Authentifizierungsmethode</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.tokenEndpointAuthMethod">
+                <source>How the client authenticates at the token endpoint. auto uses client_secret_basic when the provider advertises it, otherwise client_secret_post; none is only for public clients.</source>
+                <target>Wie sich der Client am Token-Endpunkt authentifiziert. auto verwendet client_secret_basic, wenn der Anbieter dies unterstützt, sonst client_secret_post; none ist nur für öffentliche Clients.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.tokenEndpointAuthMethod.enum.auto">
+                <source>Auto-detect</source>
+                <target>Automatisch</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.tokenEndpointAuthMethod.enum.client_secret_basic">
+                <source>Client secret basic</source>
+                <target>Client-Secret Basic</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.tokenEndpointAuthMethod.enum.client_secret_post">
+                <source>Client secret post</source>
+                <target>Client-Secret Post</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.tokenEndpointAuthMethod.enum.none">
+                <source>None (public client)</source>
+                <target>Keine (öffentlicher Client)</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.enableFrontend">
+                <source>Enable frontend login</source>
+                <target>Frontend-Anmeldung aktivieren</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.enableFrontend">
+                <source>Enables OIDC login for frontend users of this site. Default: on.</source>
+                <target>Aktiviert die OIDC-Anmeldung für Frontend-Benutzer dieser Site. Standard: an.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.useUserinfo">
+                <source>Use userinfo endpoint</source>
+                <target>Userinfo-Endpunkt verwenden</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.useUserinfo">
+                <source>Fetches additional claims from the userinfo endpoint after token exchange. The sub claim must match the ID token.</source>
+                <target>Ruft nach dem Token-Austausch zusätzliche Claims vom Userinfo-Endpunkt ab. Der sub-Claim muss mit dem ID-Token übereinstimmen.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.backchannelLogout">
+                <source>Back-channel logout</source>
+                <target>Back-Channel-Logout</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.backchannelLogout">
+                <source>Accepts OpenID back-channel logout requests at the configured route. Affected sessions end on their next request.</source>
+                <target>Akzeptiert OpenID-Back-Channel-Logout-Anfragen an der konfigurierten Route. Betroffene Sitzungen enden bei der nächsten Anfrage.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.silentSso">
+                <source>Silent SSO</source>
+                <target>Silent SSO</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.silentSso">
+                <source>Checks anonymous visitors once per interval with prompt=none and logs them in silently if a provider session exists. Bots and non-HTML requests are skipped.</source>
+                <target>Prüft anonyme Besucher einmal pro Intervall mit prompt=none und meldet sie automatisch an, wenn eine Anbietersitzung besteht. Bots und Nicht-HTML-Anfragen werden übersprungen.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.silentSsoInterval">
+                <source>Silent SSO interval</source>
+                <target>Silent-SSO-Intervall</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.silentSsoInterval">
+                <source>Number of seconds between silent SSO checks for anonymous visitors. Default: 3600.</source>
+                <target>Anzahl der Sekunden zwischen Silent-SSO-Prüfungen für anonyme Besucher. Standard: 3600.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.languageParameter">
+                <source>Language parameter</source>
+                <target>Sprachparameter</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.languageParameter">
+                <source>Comma-separated authorize parameter names that receive the two-letter site language. For Keycloak use ui_locales,kc_locale. Default: ui_locales.</source>
+                <target>Kommagetrennte Namen von Authorize-Parametern, die die zweibuchstabige Site-Sprache erhalten. Für Keycloak ui_locales,kc_locale verwenden. Standard: ui_locales.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.idpHint">
+                <source>Identity provider hint</source>
+                <target>Identity-Provider-Hinweis</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.idpHint">
+                <source>Value for the Keycloak kc_idp_hint parameter to jump directly to a brokered identity provider. Leave empty to show the provider's login page.</source>
+                <target>Wert für den Keycloak-Parameter kc_idp_hint, um direkt zu einem vermittelten Identity Provider zu springen. Leer lassen, um die Anmeldeseite des Anbieters anzuzeigen.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.clockSkew">
+                <source>Clock skew</source>
+                <target>Uhrenabweichung</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.clockSkew">
+                <source>Tolerance in seconds when validating exp, iat and nbf claims. Default: 60.</source>
+                <target>Toleranz in Sekunden bei der Prüfung der Claims exp, iat und nbf. Standard: 60.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.auth.allowedSigningAlgorithms">
+                <source>Allowed signing algorithms</source>
+                <target>Erlaubte Signaturalgorithmen</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.auth.allowedSigningAlgorithms">
+                <source>Signing algorithms TYPO3 accepts for ID and logout tokens; intersected with what the provider announces. Symmetric (HS*) and unsigned tokens are always rejected. Default: RS256, RS384, RS512, PS256, ES256, ES384.</source>
+                <target>Signaturalgorithmen, die TYPO3 für ID- und Logout-Token akzeptiert; geschnitten mit den vom Anbieter angekündigten. Symmetrische (HS*) und unsignierte Token werden immer abgelehnt. Standard: RS256, RS384, RS512, PS256, ES256, ES384.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.storagePid">
+                <source>Frontend user storage page</source>
+                <target>Speicherseite für Frontend-Benutzer</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.storagePid">
+                <source>Page ID where newly created frontend users are stored. Default: 0 (not set).</source>
+                <target>Seiten-ID, auf der neu angelegte Frontend-Benutzer gespeichert werden. Standard: 0 (nicht gesetzt).</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.defaultGroups">
+                <source>Default groups</source>
+                <target>Standardgruppen</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.defaultGroups">
+                <source>Comma-separated frontend user group UIDs assigned to newly created users. Default: empty.</source>
+                <target>Kommagetrennte UIDs von Frontend-Benutzergruppen, die neu angelegten Benutzern zugewiesen werden. Standard: leer.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.mustExistLocally">
+                <source>Require existing frontend user</source>
+                <target>Lokalen Frontend-Benutzer voraussetzen</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.mustExistLocally">
+                <source>When enabled, no new frontend users are created; only existing accounts are linked. Default: off.</source>
+                <target>Wenn aktiviert, werden keine neuen Frontend-Benutzer angelegt; es werden nur vorhandene Konten verknüpft. Standard: aus.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.reEnableDisabled">
+                <source>Re-enable disabled users</source>
+                <target>Deaktivierte Benutzer reaktivieren</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.reEnableDisabled">
+                <source>Re-enables a disabled frontend user on successful OIDC login. Default: off.</source>
+                <target>Reaktiviert einen deaktivierten Frontend-Benutzer bei erfolgreicher OIDC-Anmeldung. Standard: aus.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.undelete">
+                <source>Undelete deleted users</source>
+                <target>Gelöschte Benutzer wiederherstellen</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.undelete">
+                <source>Undeletes a deleted frontend user on successful OIDC login. Default: off.</source>
+                <target>Stellt einen gelöschten Frontend-Benutzer bei erfolgreicher OIDC-Anmeldung wieder her. Standard: aus.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.linkByField">
+                <source>Link by field</source>
+                <target>Verknüpfung nach Feld</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.linkByField">
+                <source>Links an existing, not yet linked frontend user whose field matches the claim on first login. For email, email_verified must be true when linkRequireVerifiedEmail is enabled.</source>
+                <target>Verknüpft einen vorhandenen, noch nicht verknüpften Frontend-Benutzer, dessen Feld beim ersten Login mit dem Claim übereinstimmt. Bei E-Mail muss email_verified true sein, wenn linkRequireVerifiedEmail aktiviert ist.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.linkByField.enum.">
+                <source>Not set</source>
+                <target>Nicht gesetzt</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.linkByField.enum.username">
+                <source>Username</source>
+                <target>Benutzername</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.linkByField.enum.email">
+                <source>Email</source>
+                <target>E-Mail</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.linkByClaim">
+                <source>Link by claim</source>
+                <target>Verknüpfung nach Claim</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.linkByClaim">
+                <source>Claim used to match the field selected in linkByField. Default: email.</source>
+                <target>Claim, der zum Abgleich mit dem in linkByField ausgewählten Feld verwendet wird. Standard: email.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.linkRequireVerifiedEmail">
+                <source>Require verified email</source>
+                <target>Bestätigte E-Mail voraussetzen</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.linkRequireVerifiedEmail">
+                <source>Only links by email when the ID token or userinfo contains email_verified=true. Default: on.</source>
+                <target>Verknüpft nur dann per E-Mail, wenn ID-Token oder Userinfo email_verified=true enthält. Standard: an.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.users.groupsClaim">
+                <source>Groups claim</source>
+                <target>Gruppen-Claim</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.users.groupsClaim">
+                <source>Claim (dotted path, e.g. realm_access.roles or groups) whose values are mapped through the YAML group mapping. Leave empty to disable group mapping.</source>
+                <target>Claim (Pfad mit Punkten, z. B. realm_access.roles oder groups), dessen Werte über das YAML-Gruppen-Mapping zugeordnet werden. Leer lassen, um die Gruppenzuordnung zu deaktivieren.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.ui.afterLoginPageId">
+                <source>After-login page</source>
+                <target>Seite nach Anmeldung</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.ui.afterLoginPageId">
+                <source>Page ID used as fallback redirect after a successful login. Default: 0 (not set).</source>
+                <target>Seiten-ID als Fallback-Weiterleitung nach erfolgreicher Anmeldung. Standard: 0 (nicht gesetzt).</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.ui.logoutRedirectPageId">
+                <source>Logout redirect page</source>
+                <target>Weiterleitungsseite nach Abmeldung</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.ui.logoutRedirectPageId">
+                <source>Page ID to redirect to after logout. Default: 0 (not set).</source>
+                <target>Seiten-ID, zu der nach der Abmeldung weitergeleitet wird. Standard: 0 (nicht gesetzt).</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.ui.errorPageId">
+                <source>Error page</source>
+                <target>Fehlerseite</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.ui.errorPageId">
+                <source>Page ID shown for login errors; receives the query parameter oidc_error=&lt;code&gt;. Default: 0 (not set).</source>
+                <target>Seiten-ID, die bei Anmeldefehlern angezeigt wird; erhält den Query-Parameter oidc_error=&lt;code&gt;. Standard: 0 (nicht gesetzt).</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.backend.enable">
+                <source>Enable backend login</source>
+                <target>Backend-Anmeldung aktivieren</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.backend.enable">
+                <source>Enables OIDC login for the TYPO3 backend. Uses the site selected in the extension configuration (backendSite). Default: off.</source>
+                <target>Aktiviert die OIDC-Anmeldung für das TYPO3-Backend. Verwendet die in der Extension-Konfiguration ausgewählte Site (backendSite). Standard: aus.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.backend.createUsers">
+                <source>Create backend users</source>
+                <target>Backend-Benutzer anlegen</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.backend.createUsers">
+                <source>Creates backend users on first OIDC login. Default: off.</source>
+                <target>Legt Backend-Benutzer beim ersten OIDC-Login an. Standard: aus.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.backend.defaultGroups">
+                <source>Default backend groups</source>
+                <target>Standard-Backend-Gruppen</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.backend.defaultGroups">
+                <source>Comma-separated backend user group UIDs assigned to newly created backend users. Default: empty.</source>
+                <target>Kommagetrennte UIDs von Backend-Benutzergruppen, die neu angelegten Backend-Benutzern zugewiesen werden. Standard: leer.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.backend.linkByField">
+                <source>Backend link by field</source>
+                <target>Backend-Verknüpfung nach Feld</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.backend.linkByField">
+                <source>Links an existing, not yet linked backend user whose field matches the claim on first login. Default: email.</source>
+                <target>Verknüpft einen vorhandenen, noch nicht verknüpften Backend-Benutzer, dessen Feld beim ersten Login mit dem Claim übereinstimmt. Standard: email.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.backend.linkByField.enum.">
+                <source>Not set</source>
+                <target>Nicht gesetzt</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.backend.linkByField.enum.username">
+                <source>Username</source>
+                <target>Benutzername</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.backend.linkByField.enum.email">
+                <source>Email</source>
+                <target>E-Mail</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.backend.groupsClaim">
+                <source>Backend groups claim</source>
+                <target>Backend-Gruppen-Claim</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.backend.groupsClaim">
+                <source>Claim (dotted path) whose values are mapped through the YAML backend group mapping. Leave empty to disable group mapping.</source>
+                <target>Claim (Pfad mit Punkten), dessen Werte über das YAML-Backend-Gruppen-Mapping zugeordnet werden. Leer lassen, um die Gruppenzuordnung zu deaktivieren.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.routes.authorize">
+                <source>Authorize route</source>
+                <target>Autorisierungsroute</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.routes.authorize">
+                <source>Path below the site base that starts the login (optional ?redirect=&lt;return URL&gt;). Default: /oauth_authorize.</source>
+                <target>Pfad unterhalb der Site-Basis, der die Anmeldung startet (optional ?redirect=&lt;Rücksprung-URL&gt;). Standard: /oauth_authorize.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.routes.callback">
+                <source>Callback route</source>
+                <target>Callback-Route</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.routes.callback">
+                <source>Path below the site base that receives the authorization response. Must match a redirect URI registered at the provider. Default: /oauth_callback.</source>
+                <target>Pfad unterhalb der Site-Basis, der die Autorisierungsantwort entgegennimmt. Muss mit einer beim Anbieter registrierten Redirect-URI übereinstimmen. Standard: /oauth_callback.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.routes.logout">
+                <source>Logout route</source>
+                <target>Abmelderoute</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.routes.logout">
+                <source>Path below the site base that initiates logout. Default: /oauth_logout.</source>
+                <target>Pfad unterhalb der Site-Basis, der die Abmeldung einleitet. Standard: /oauth_logout.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.routes.backchannelLogout">
+                <source>Back-channel logout route</source>
+                <target>Back-Channel-Logout-Route</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.routes.backchannelLogout">
+                <source>Path below the site base that accepts OpenID back-channel logout requests. Default: /oauth_backchannel_logout.</source>
+                <target>Pfad unterhalb der Site-Basis, der OpenID-Back-Channel-Logout-Anfragen akzeptiert. Standard: /oauth_backchannel_logout.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.endpoints.authorization">
+                <source>Authorization endpoint</source>
+                <target>Autorisierungsendpunkt</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.endpoints.authorization">
+                <source>Optional override for the authorization endpoint. Normally resolved from the issuer discovery document. Default: empty.</source>
+                <target>Optionale Überschreibung des Autorisierungsendpunkts. Wird normalerweise aus dem Discovery-Dokument des Issuers ermittelt. Standard: leer.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.endpoints.token">
+                <source>Token endpoint</source>
+                <target>Token-Endpunkt</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.endpoints.token">
+                <source>Optional override for the token endpoint. Normally resolved from the issuer discovery document. Default: empty.</source>
+                <target>Optionale Überschreibung des Token-Endpunkts. Wird normalerweise aus dem Discovery-Dokument des Issuers ermittelt. Standard: leer.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.endpoints.userinfo">
+                <source>Userinfo endpoint</source>
+                <target>Userinfo-Endpunkt</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.endpoints.userinfo">
+                <source>Optional override for the userinfo endpoint. Normally resolved from the issuer discovery document. Default: empty.</source>
+                <target>Optionale Überschreibung des Userinfo-Endpunkts. Wird normalerweise aus dem Discovery-Dokument des Issuers ermittelt. Standard: leer.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.endpoints.endSession">
+                <source>End session endpoint</source>
+                <target>End-Session-Endpunkt</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.endpoints.endSession">
+                <source>Optional override for the end session endpoint. Normally resolved from the issuer discovery document. Default: empty.</source>
+                <target>Optionale Überschreibung des End-Session-Endpunkts. Wird normalerweise aus dem Discovery-Dokument des Issuers ermittelt. Standard: leer.</target>
+            </trans-unit>
+            <trans-unit id="settings.oidcConnect.endpoints.jwks">
+                <source>JWKS endpoint</source>
+                <target>JWKS-Endpunkt</target>
+            </trans-unit>
+            <trans-unit id="settings.description.oidcConnect.endpoints.jwks">
+                <source>Optional override for the JSON Web Key Set endpoint. Normally resolved from the issuer discovery document. Default: empty.</source>
+                <target>Optionale Überschreibung des JSON-Web-Key-Set-Endpunkts. Wird normalerweise aus dem Discovery-Dokument des Issuers ermittelt. Standard: leer.</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

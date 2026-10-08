@@ -8,15 +8,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 
 /**
- * Default implementation backed by the dedicated `cache.oidc_connect`
- * cache frontend (configured in {@see ../../ext_localconf.php} and wired
- * to the DI container via Services.yaml).
- *
- * One-time consume is realised by removing the entry from the cache on
- * a successful read. Two simultaneous callback hits with the same state
- * — practically impossible in a normal Authorization Code Flow but
- * conceivable on retries — will resolve to exactly one record returned
- * and one null; both outcomes are explicitly handled by the caller.
+ * Default state store on the `oidc_connect` cache. Entries are removed on
+ * the first read, so a state can be consumed only once.
  */
 final readonly class CacheBackedAuthorizationStateStore implements AuthorizationStateStoreInterface
 {
@@ -28,19 +21,14 @@ final readonly class CacheBackedAuthorizationStateStore implements Authorization
     public function save(AuthorizationStateRecord $record, int $ttl = 600): void
     {
         if ($record->state === '') {
-            throw new \LogicException('AuthorizationStateRecord::$state must not be empty.');
+            throw new \LogicException('AuthorizationStateRecord::$state must not be empty.', 1747700001);
         }
-        $this->cache->set(
-            $this->cacheKey($record->state),
-            $this->serialize($record),
-            ['oidc_connect_state'],
-            $ttl
-        );
+        $this->cache->set($this->cacheKey($record->state), $record->toArray(), ['oidc_connect_state'], $ttl);
     }
 
     public function consume(string $state): ?AuthorizationStateRecord
     {
-        if ($state === '') {
+        if ($state === '' || preg_match('/^[A-Za-z0-9_-]{20,128}$/', $state) !== 1) {
             return null;
         }
         $key = $this->cacheKey($state);
@@ -48,57 +36,19 @@ final readonly class CacheBackedAuthorizationStateStore implements Authorization
         if (!is_array($data)) {
             return null;
         }
-        // Best-effort one-time semantics: remove immediately so a second
-        // call with the same state can't replay it.
         $this->cache->remove($key);
-        return $this->hydrate($data);
+        return AuthorizationStateRecord::fromArray($data);
     }
 
     public function discard(string $state): void
     {
-        if ($state === '') {
-            return;
+        if ($state !== '' && preg_match('/^[A-Za-z0-9_-]{20,128}$/', $state) === 1) {
+            $this->cache->remove($this->cacheKey($state));
         }
-        $this->cache->remove($this->cacheKey($state));
     }
 
-    /**
-     * State is base64url (a-z, A-Z, 0-9, _-) so it would be a valid cache
-     * key on its own, but we prefix to avoid collisions with other cache
-     * entries that may share the backend.
-     */
     private function cacheKey(string $state): string
     {
         return 'state_' . $state;
-    }
-
-    /** @return array<string, mixed> */
-    private function serialize(AuthorizationStateRecord $r): array
-    {
-        return [
-            'state'              => $r->state,
-            'nonce'              => $r->nonce,
-            'codeVerifier'       => $r->codeVerifier,
-            'redirectUri'        => $r->redirectUri,
-            'redirectAfterLogin' => $r->redirectAfterLogin,
-            'siteIdentifier'     => $r->siteIdentifier,
-            'cookieTokenHash'    => $r->cookieTokenHash,
-            'createdAt'          => $r->createdAt,
-        ];
-    }
-
-    /** @param array<string, mixed> $data */
-    private function hydrate(array $data): AuthorizationStateRecord
-    {
-        return new AuthorizationStateRecord(
-            state:              (string)($data['state'] ?? ''),
-            nonce:              (string)($data['nonce'] ?? ''),
-            codeVerifier:       isset($data['codeVerifier']) ? (string)$data['codeVerifier'] : null,
-            redirectUri:        (string)($data['redirectUri'] ?? ''),
-            redirectAfterLogin: (string)($data['redirectAfterLogin'] ?? ''),
-            siteIdentifier:     (string)($data['siteIdentifier'] ?? ''),
-            cookieTokenHash:    (string)($data['cookieTokenHash'] ?? ''),
-            createdAt:          (int)($data['createdAt'] ?? 0),
-        );
     }
 }

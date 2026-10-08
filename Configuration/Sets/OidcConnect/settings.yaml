@@ -1,29 +1,14 @@
-# Default values shipped with the OIDC Connect Set.
-# Override these in `config/sites/<site-id>/settings.yaml`.
+# Structured defaults that cannot be expressed in settings.definitions.yaml.
+# Scalar defaults live in settings.definitions.yaml.
+# Override in config/sites/<site-id>/settings.yaml.
 
 oidcConnect:
-  scopes:
-    - openid
-    - email
-    - profile
-  callbackRoute: '/oauth_callback'
-  authorizeRoute: '/oauth_authorize'
-  auth:
-    enableFrontend: true
-    enableBackend: false
-    enablePkce: true
-    revokeAccessTokenAfterLogin: false
-    csrfProtection: true
-    authorizeLanguageParameter: 'language'
-  users:
-    storagePid: 0
-    defaultGroup: 0
-    mustExistLocally: false
-    reEnableHidden: false
-    undelete: false
   mapping:
     fe_users:
-      username: 'sub'
-      email: 'email'
-      first_name: 'given_name'
-      last_name: 'family_name'
+      email: email
+      first_name: given_name
+      last_name: family_name
+      name: name
+    be_users:
+      email: email
+      realName: name

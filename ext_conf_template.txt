@@ -1,0 +1,2 @@
+# cat=backend/enable/10; type=string; label=Backend login site: Identifier of the site whose oidcConnect settings drive the backend login (the backend has no site context). Empty = first site with oidcConnect.backend.enable.
+backendSite =

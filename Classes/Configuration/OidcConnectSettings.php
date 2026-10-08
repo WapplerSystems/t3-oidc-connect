@@ -5,28 +5,44 @@ declare(strict_types=1);
 namespace WapplerSystems\OidcConnect\Configuration;
 
 /**
- * Typed, immutable accessor for the resolved `oidcConnect.*` site-settings
- * of one site. Construct via {@see OidcConnectSettingsFactory::forSite()}
- * which applies context variants first.
+ * Typed, immutable accessor for the resolved `oidcConnect.*` site settings of
+ * one site. Construct via {@see OidcConnectSettingsFactory::forSite()}, which
+ * applies context variants and resolves the client secret first.
  *
- * No defaults are coded here — defaults come from
- * `Configuration/Sets/OidcConnect/settings.yaml`. This class is a pure read
- * facade: if a setting is missing, the getter returns the type-appropriate
- * empty value (empty string, zero, empty array, false).
+ * Defaults come from `Configuration/Sets/OidcConnect/settings.definitions.yaml`;
+ * the fallbacks below only matter when the set is not included.
  */
 final readonly class OidcConnectSettings
 {
     /**
-     * @param array<string, mixed> $data Flat & nested `oidcConnect.*` subtree
-     *                                   after variant resolution.
+     * @param array<string, mixed> $data the `oidcConnect` subtree after variant resolution
      */
-    public function __construct(private array $data) {}
+    public function __construct(
+        private string $siteIdentifier,
+        private array $data,
+        #[\SensitiveParameter]
+        private string $clientSecret = '',
+    ) {}
+
+    public function siteIdentifier(): string
+    {
+        return $this->siteIdentifier;
+    }
+
+    /**
+     * True once the minimum for a working flow is configured.
+     */
+    public function isConfigured(): bool
+    {
+        return $this->clientId() !== ''
+            && ($this->issuer() !== '' || $this->endpoint('authorization') !== '');
+    }
 
     // --- Connection ---------------------------------------------------------
 
     public function issuer(): string
     {
-        return (string)$this->get('issuer', '');
+        return rtrim((string)$this->get('issuer', ''), '/');
     }
 
     public function clientId(): string
@@ -36,106 +52,237 @@ final readonly class OidcConnectSettings
 
     public function clientSecret(): string
     {
-        return (string)$this->get('clientSecret', '');
+        return $this->clientSecret;
+    }
+
+    public function clientSecretEnv(): string
+    {
+        return (string)$this->get('clientSecretEnv', '');
     }
 
     /** @return list<string> */
     public function scopes(): array
     {
-        $scopes = $this->get('scopes', []);
-        if (is_string($scopes)) {
-            $scopes = array_filter(array_map('trim', explode(',', $scopes)));
+        $scopes = $this->stringList('scopes');
+        if (!in_array('openid', $scopes, true)) {
+            array_unshift($scopes, 'openid');
         }
-        return array_values(array_filter(array_map('strval', (array)$scopes)));
+        return $scopes;
     }
 
-    public function redirectUri(): string
+    public function tokenEndpointAuthMethod(): string
     {
-        return (string)$this->get('redirectUri', '');
+        return (string)$this->get('tokenEndpointAuthMethod', 'auto');
     }
-
-    public function callbackRoute(): string
-    {
-        return (string)$this->get('callbackRoute', '/oauth_callback');
-    }
-
-    public function authorizeRoute(): string
-    {
-        return (string)$this->get('authorizeRoute', '/oauth_authorize');
-    }
-
-    // --- Endpoint overrides (otherwise resolved via .well-known) -----------
 
     public function endpoint(string $name): string
     {
         return (string)$this->get('endpoints.' . $name, '');
     }
 
-    // --- Auth behaviour ----------------------------------------------------
+    // --- Routes ---------------------------------------------------------------
 
-    public function isFrontendEnabled(): bool       { return (bool)$this->get('auth.enableFrontend', false); }
-    public function isBackendEnabled(): bool        { return (bool)$this->get('auth.enableBackend', false); }
-    public function isPkceEnabled(): bool           { return (bool)$this->get('auth.enablePkce', true); }
-    public function shouldRevokeAccessToken(): bool { return (bool)$this->get('auth.revokeAccessTokenAfterLogin', false); }
-    public function isCsrfProtected(): bool         { return (bool)$this->get('auth.csrfProtection', true); }
-    public function authorizeLanguageParameter(): string
+    public function route(string $name): string
     {
-        return (string)$this->get('auth.authorizeLanguageParameter', 'language');
+        $defaults = [
+            'authorize' => '/oauth_authorize',
+            'callback' => '/oauth_callback',
+            'logout' => '/oauth_logout',
+            'backchannelLogout' => '/oauth_backchannel_logout',
+        ];
+        $route = trim((string)$this->get('routes.' . $name, $defaults[$name] ?? ''));
+        return $route === '' ? '' : '/' . ltrim($route, '/');
     }
 
-    // --- User provisioning -------------------------------------------------
+    // --- Auth behaviour -------------------------------------------------------
 
-    public function usersStoragePid(): int    { return (int)$this->get('users.storagePid', 0); }
-    public function usersDefaultGroup(): int  { return (int)$this->get('users.defaultGroup', 0); }
-    public function usersMustExistLocally(): bool { return (bool)$this->get('users.mustExistLocally', false); }
-    public function reEnableHiddenUsers(): bool   { return (bool)$this->get('users.reEnableHidden', false); }
-    public function undeleteUsers(): bool         { return (bool)$this->get('users.undelete', false); }
-
-    // --- Mapping -----------------------------------------------------------
-
-    /** @return array<string, string> column => claim */
-    public function mappingFor(string $table): array
+    public function isFrontendEnabled(): bool
     {
-        $mapping = $this->get('mapping.' . $table, []);
-        if (!is_array($mapping)) {
-            return [];
+        return (bool)$this->get('auth.enableFrontend', true) && $this->isConfigured();
+    }
+
+    public function useUserinfo(): bool
+    {
+        return (bool)$this->get('auth.useUserinfo', true);
+    }
+
+    public function isBackchannelLogoutEnabled(): bool
+    {
+        return (bool)$this->get('auth.backchannelLogout', true);
+    }
+
+    public function isSilentSsoEnabled(): bool
+    {
+        return (bool)$this->get('auth.silentSso', false);
+    }
+
+    public function silentSsoInterval(): int
+    {
+        return max(60, (int)$this->get('auth.silentSsoInterval', 3600));
+    }
+
+    public function languageParameter(): string
+    {
+        return (string)$this->get('auth.languageParameter', 'ui_locales');
+    }
+
+    public function idpHint(): string
+    {
+        return (string)$this->get('auth.idpHint', '');
+    }
+
+    public function clockSkew(): int
+    {
+        return max(0, (int)$this->get('auth.clockSkew', 60));
+    }
+
+    /** @return list<string> */
+    public function allowedSigningAlgorithms(): array
+    {
+        $algorithms = $this->stringList('auth.allowedSigningAlgorithms');
+        // Symmetric and unsigned algorithms are never acceptable for ID tokens
+        // validated against a public JWKS.
+        return array_values(array_filter(
+            $algorithms ?: ['RS256'],
+            static fn(string $alg): bool => $alg !== 'none' && !str_starts_with($alg, 'HS')
+        ));
+    }
+
+    // --- User provisioning ----------------------------------------------------
+
+    /**
+     * Provisioning options for the given login type ('FE' or 'BE').
+     */
+    public function userOptions(string $loginType): UserProvisioningOptions
+    {
+        if ($loginType === 'BE') {
+            return new UserProvisioningOptions(
+                table: 'be_users',
+                groupTable: 'be_groups',
+                storagePid: 0,
+                defaultGroups: $this->intList('backend.defaultGroups'),
+                createUsers: (bool)$this->get('backend.createUsers', false),
+                reEnableDisabled: false,
+                undelete: false,
+                linkByField: (string)$this->get('backend.linkByField', 'email'),
+                linkByClaim: 'email',
+                linkRequireVerifiedEmail: true,
+                groupsClaim: (string)$this->get('backend.groupsClaim', ''),
+                mapping: $this->mappingFor('be_users'),
+                groupMapping: $this->groupMappingFor('be_groups'),
+            );
         }
-        return array_filter($mapping, static fn($v) => is_string($v) || is_array($v));
+        return new UserProvisioningOptions(
+            table: 'fe_users',
+            groupTable: 'fe_groups',
+            storagePid: (int)$this->get('users.storagePid', 0),
+            defaultGroups: $this->intList('users.defaultGroups'),
+            createUsers: !(bool)$this->get('users.mustExistLocally', false),
+            reEnableDisabled: (bool)$this->get('users.reEnableDisabled', false),
+            undelete: (bool)$this->get('users.undelete', false),
+            linkByField: (string)$this->get('users.linkByField', ''),
+            linkByClaim: (string)$this->get('users.linkByClaim', 'email'),
+            linkRequireVerifiedEmail: (bool)$this->get('users.linkRequireVerifiedEmail', true),
+            groupsClaim: (string)$this->get('users.groupsClaim', ''),
+            mapping: $this->mappingFor('fe_users'),
+            groupMapping: $this->groupMappingFor('fe_groups'),
+        );
     }
 
-    // --- UI ---------------------------------------------------------------
+    public function isBackendEnabled(): bool
+    {
+        return (bool)$this->get('backend.enable', false) && $this->isConfigured();
+    }
 
-    public function loginPageId(): int          { return (int)$this->get('ui.loginPageId', 0); }
-    public function logoutRedirectPageId(): int { return (int)$this->get('ui.logoutRedirectPageId', 0); }
+    // --- UI -------------------------------------------------------------------
 
-    // --- Raw access (for advanced/forward-compat callers) ------------------
+    public function afterLoginPageId(): int
+    {
+        return (int)$this->get('ui.afterLoginPageId', 0);
+    }
 
+    public function logoutRedirectPageId(): int
+    {
+        return (int)$this->get('ui.logoutRedirectPageId', 0);
+    }
+
+    public function errorPageId(): int
+    {
+        return (int)$this->get('ui.errorPageId', 0);
+    }
+
+    // --- Raw access -------------------------------------------------------------
+
+    /** @return array<string, mixed> */
     public function raw(): array
     {
         return $this->data;
     }
 
-    public function has(string $path): bool
-    {
-        return $this->resolve($path) !== null;
-    }
-
     public function get(string $path, mixed $default = null): mixed
     {
-        $value = $this->resolve($path);
-        return $value ?? $default;
-    }
-
-    private function resolve(string $path): mixed
-    {
-        $segments = explode('.', $path);
         $value = $this->data;
-        foreach ($segments as $segment) {
+        foreach (explode('.', $path) as $segment) {
             if (!is_array($value) || !array_key_exists($segment, $value)) {
-                return null;
+                return $default;
             }
             $value = $value[$segment];
         }
-        return $value;
+        return $value ?? $default;
+    }
+
+    /** @return array<string, string> column => claim */
+    private function mappingFor(string $table): array
+    {
+        $mapping = $this->get('mapping.' . $table, []);
+        if (!is_array($mapping)) {
+            return [];
+        }
+        $result = [];
+        foreach ($mapping as $column => $claim) {
+            if (is_string($column) && is_scalar($claim) && (string)$claim !== '') {
+                $result[$column] = (string)$claim;
+            }
+        }
+        return $result;
+    }
+
+    /** @return array<string, list<int>> pattern => group uids */
+    private function groupMappingFor(string $table): array
+    {
+        $mapping = $this->get('groupMapping.' . $table, []);
+        if (!is_array($mapping)) {
+            return [];
+        }
+        $result = [];
+        foreach ($mapping as $pattern => $groups) {
+            $uids = is_array($groups) ? $groups : explode(',', (string)$groups);
+            $uids = array_values(array_filter(array_map('intval', $uids), static fn(int $uid): bool => $uid > 0));
+            if ((string)$pattern !== '' && $uids !== []) {
+                $result[(string)$pattern] = $uids;
+            }
+        }
+        return $result;
+    }
+
+    /** @return list<string> */
+    private function stringList(string $path): array
+    {
+        $value = $this->get($path, []);
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+        if (!is_array($value)) {
+            return [];
+        }
+        // Settings merging re-keys lists; keep declaration order.
+        ksort($value, SORT_NUMERIC);
+        return array_values(array_filter(array_map(static fn($v): string => trim((string)$v), $value), static fn(string $v): bool => $v !== ''));
+    }
+
+    /** @return list<int> */
+    private function intList(string $path): array
+    {
+        return array_values(array_filter(array_map('intval', $this->stringList($path)), static fn(int $v): bool => $v > 0));
     }
 }

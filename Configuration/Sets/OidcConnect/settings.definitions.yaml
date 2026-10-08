@@ -2,14 +2,24 @@ categories:
   oidcConnect: ~
   oidcConnect.connection:
     parent: oidcConnect
-  oidcConnect.endpoints:
-    parent: oidcConnect
   oidcConnect.auth:
     parent: oidcConnect
   oidcConnect.users:
     parent: oidcConnect
   oidcConnect.ui:
     parent: oidcConnect
+  oidcConnect.backend:
+    parent: oidcConnect
+  oidcConnect.routes:
+    parent: oidcConnect
+  oidcConnect.endpoints:
+    parent: oidcConnect
+
+# The client secret is deliberately NOT a site setting: the site settings
+# editor writes resolved %env()% placeholders back as plain text and TYPO3
+# caches resolved settings in var/cache. See SecretResolver for the lookup
+# order (env var named in `clientSecretEnv`, then OIDC_CONNECT_<SITE>_CLIENT_SECRET,
+# then $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['oidc_connect']['clientSecrets'][<site>]).
 
 settings:
   # --- Connection ----------------------------------------------------------
@@ -21,7 +31,7 @@ settings:
     default: ''
     type: string
     category: oidcConnect.connection
-  oidcConnect.clientSecret:
+  oidcConnect.clientSecretEnv:
     default: ''
     type: string
     category: oidcConnect.connection
@@ -32,20 +42,161 @@ settings:
       - profile
     type: stringlist
     category: oidcConnect.connection
-  oidcConnect.redirectUri:
-    default: ''
-    type: url
-    category: oidcConnect.connection
-  oidcConnect.callbackRoute:
-    default: '/oauth_callback'
+  oidcConnect.tokenEndpointAuthMethod:
+    default: auto
     type: string
-    category: oidcConnect.connection
-  oidcConnect.authorizeRoute:
-    default: '/oauth_authorize'
-    type: string
+    enum:
+      - auto
+      - client_secret_basic
+      - client_secret_post
+      - none
     category: oidcConnect.connection
 
-  # --- Endpoints (overrides; otherwise resolved from .well-known) ---------
+  # --- Authentication behaviour -------------------------------------------
+  oidcConnect.auth.enableFrontend:
+    default: true
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.useUserinfo:
+    default: true
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.backchannelLogout:
+    default: true
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.silentSso:
+    default: false
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.silentSsoInterval:
+    default: 3600
+    type: int
+    category: oidcConnect.auth
+  oidcConnect.auth.languageParameter:
+    default: ui_locales
+    type: string
+    category: oidcConnect.auth
+  oidcConnect.auth.idpHint:
+    default: ''
+    type: string
+    category: oidcConnect.auth
+  oidcConnect.auth.clockSkew:
+    default: 60
+    type: int
+    category: oidcConnect.auth
+  oidcConnect.auth.allowedSigningAlgorithms:
+    default:
+      - RS256
+      - RS384
+      - RS512
+      - PS256
+      - ES256
+      - ES384
+    type: stringlist
+    category: oidcConnect.auth
+
+  # --- Frontend user provisioning -----------------------------------------
+  oidcConnect.users.storagePid:
+    default: 0
+    type: page
+    category: oidcConnect.users
+  oidcConnect.users.defaultGroups:
+    default: ''
+    type: string
+    category: oidcConnect.users
+  oidcConnect.users.mustExistLocally:
+    default: false
+    type: bool
+    category: oidcConnect.users
+  oidcConnect.users.reEnableDisabled:
+    default: false
+    type: bool
+    category: oidcConnect.users
+  oidcConnect.users.undelete:
+    default: false
+    type: bool
+    category: oidcConnect.users
+  oidcConnect.users.linkByField:
+    default: ''
+    type: string
+    enum:
+      - ''
+      - username
+      - email
+    category: oidcConnect.users
+  oidcConnect.users.linkByClaim:
+    default: email
+    type: string
+    category: oidcConnect.users
+  oidcConnect.users.linkRequireVerifiedEmail:
+    default: true
+    type: bool
+    category: oidcConnect.users
+  oidcConnect.users.groupsClaim:
+    default: ''
+    type: string
+    category: oidcConnect.users
+
+  # --- UI -------------------------------------------------------------------
+  oidcConnect.ui.afterLoginPageId:
+    default: 0
+    type: page
+    category: oidcConnect.ui
+  oidcConnect.ui.logoutRedirectPageId:
+    default: 0
+    type: page
+    category: oidcConnect.ui
+  oidcConnect.ui.errorPageId:
+    default: 0
+    type: page
+    category: oidcConnect.ui
+
+  # --- Backend login (uses the site selected in the extension configuration)
+  oidcConnect.backend.enable:
+    default: false
+    type: bool
+    category: oidcConnect.backend
+  oidcConnect.backend.createUsers:
+    default: false
+    type: bool
+    category: oidcConnect.backend
+  oidcConnect.backend.defaultGroups:
+    default: ''
+    type: string
+    category: oidcConnect.backend
+  oidcConnect.backend.linkByField:
+    default: email
+    type: string
+    enum:
+      - ''
+      - username
+      - email
+    category: oidcConnect.backend
+  oidcConnect.backend.groupsClaim:
+    default: ''
+    type: string
+    category: oidcConnect.backend
+
+  # --- Routes (paths below the site base) ----------------------------------
+  oidcConnect.routes.authorize:
+    default: '/oauth_authorize'
+    type: string
+    category: oidcConnect.routes
+  oidcConnect.routes.callback:
+    default: '/oauth_callback'
+    type: string
+    category: oidcConnect.routes
+  oidcConnect.routes.logout:
+    default: '/oauth_logout'
+    type: string
+    category: oidcConnect.routes
+  oidcConnect.routes.backchannelLogout:
+    default: '/oauth_backchannel_logout'
+    type: string
+    category: oidcConnect.routes
+
+  # --- Endpoint overrides (otherwise resolved via discovery) -------------
   oidcConnect.endpoints.authorization:
     default: ''
     type: url
@@ -58,81 +209,25 @@ settings:
     default: ''
     type: url
     category: oidcConnect.endpoints
-  oidcConnect.endpoints.logout:
+  oidcConnect.endpoints.endSession:
     default: ''
     type: url
     category: oidcConnect.endpoints
-  oidcConnect.endpoints.revocation:
+  oidcConnect.endpoints.jwks:
     default: ''
     type: url
     category: oidcConnect.endpoints
 
-  # --- Authentication behaviour -------------------------------------------
-  oidcConnect.auth.enableFrontend:
-    default: true
-    type: bool
-    category: oidcConnect.auth
-  oidcConnect.auth.enableBackend:
-    default: false
-    type: bool
-    category: oidcConnect.auth
-  oidcConnect.auth.enablePkce:
-    default: true
-    type: bool
-    category: oidcConnect.auth
-  oidcConnect.auth.revokeAccessTokenAfterLogin:
-    default: false
-    type: bool
-    category: oidcConnect.auth
-  oidcConnect.auth.csrfProtection:
-    default: true
-    type: bool
-    category: oidcConnect.auth
-  oidcConnect.auth.authorizeLanguageParameter:
-    default: 'language'
-    type: string
-    category: oidcConnect.auth
-
-  # --- User provisioning --------------------------------------------------
-  oidcConnect.users.storagePid:
-    default: 0
-    type: page
-    category: oidcConnect.users
-  oidcConnect.users.defaultGroup:
-    default: 0
-    type: int
-    category: oidcConnect.users
-  oidcConnect.users.mustExistLocally:
-    default: false
-    type: bool
-    category: oidcConnect.users
-  oidcConnect.users.reEnableHidden:
-    default: false
-    type: bool
-    category: oidcConnect.users
-  oidcConnect.users.undelete:
-    default: false
-    type: bool
-    category: oidcConnect.users
-
-  # --- UI / Frontend plugin defaults --------------------------------------
-  oidcConnect.ui.loginPageId:
-    default: 0
-    type: page
-    category: oidcConnect.ui
-  oidcConnect.ui.logoutRedirectPageId:
-    default: 0
-    type: page
-    category: oidcConnect.ui
-
-# NOTE
-# Two structured pieces of settings are intentionally NOT declared here so
-# they remain YAML-only (not exposed in the Site Settings BE UI):
+# YAML-only structures (not editable in the settings editor):
 #
-#   oidcConnect.mapping.<table>.<column>: <claim>
-#       Claim -> column mapping per record table (fe_users, be_users, ...).
+#   oidcConnect.mapping.fe_users / oidcConnect.mapping.be_users
+#       <column>: <claim>          claim name, dotted path for nested claims
+#       <column>: '=constant'      literal value
 #
-#   oidcConnect.variants:
-#       Context-dependent overlays in baseVariants-style. Resolved at site-
-#       configuration load time by `ContextVariantResolver`; merged into the
-#       top-level `oidcConnect.*` keys before SiteSettings is built.
+#   oidcConnect.groupMapping.fe_groups / oidcConnect.groupMapping.be_groups
+#       '<claim value pattern>': '<comma separated group uids>'
+#       Patterns support * wildcards and are matched case-insensitively against
+#       every value of `users.groupsClaim` / `backend.groupsClaim`.
+#
+#   oidcConnect.variants
+#       Context dependent overlays (baseVariants style), see ContextVariantResolver.
