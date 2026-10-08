@@ -1,0 +1,138 @@
+categories:
+  oidcConnect: ~
+  oidcConnect.connection:
+    parent: oidcConnect
+  oidcConnect.endpoints:
+    parent: oidcConnect
+  oidcConnect.auth:
+    parent: oidcConnect
+  oidcConnect.users:
+    parent: oidcConnect
+  oidcConnect.ui:
+    parent: oidcConnect
+
+settings:
+  # --- Connection ----------------------------------------------------------
+  oidcConnect.issuer:
+    default: ''
+    type: url
+    category: oidcConnect.connection
+  oidcConnect.clientId:
+    default: ''
+    type: string
+    category: oidcConnect.connection
+  oidcConnect.clientSecret:
+    default: ''
+    type: string
+    category: oidcConnect.connection
+  oidcConnect.scopes:
+    default:
+      - openid
+      - email
+      - profile
+    type: stringlist
+    category: oidcConnect.connection
+  oidcConnect.redirectUri:
+    default: ''
+    type: url
+    category: oidcConnect.connection
+  oidcConnect.callbackRoute:
+    default: '/oauth_callback'
+    type: string
+    category: oidcConnect.connection
+  oidcConnect.authorizeRoute:
+    default: '/oauth_authorize'
+    type: string
+    category: oidcConnect.connection
+
+  # --- Endpoints (overrides; otherwise resolved from .well-known) ---------
+  oidcConnect.endpoints.authorization:
+    default: ''
+    type: url
+    category: oidcConnect.endpoints
+  oidcConnect.endpoints.token:
+    default: ''
+    type: url
+    category: oidcConnect.endpoints
+  oidcConnect.endpoints.userinfo:
+    default: ''
+    type: url
+    category: oidcConnect.endpoints
+  oidcConnect.endpoints.logout:
+    default: ''
+    type: url
+    category: oidcConnect.endpoints
+  oidcConnect.endpoints.revocation:
+    default: ''
+    type: url
+    category: oidcConnect.endpoints
+
+  # --- Authentication behaviour -------------------------------------------
+  oidcConnect.auth.enableFrontend:
+    default: true
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.enableBackend:
+    default: false
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.enablePkce:
+    default: true
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.revokeAccessTokenAfterLogin:
+    default: false
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.csrfProtection:
+    default: true
+    type: bool
+    category: oidcConnect.auth
+  oidcConnect.auth.authorizeLanguageParameter:
+    default: 'language'
+    type: string
+    category: oidcConnect.auth
+
+  # --- User provisioning --------------------------------------------------
+  oidcConnect.users.storagePid:
+    default: 0
+    type: page
+    category: oidcConnect.users
+  oidcConnect.users.defaultGroup:
+    default: 0
+    type: int
+    category: oidcConnect.users
+  oidcConnect.users.mustExistLocally:
+    default: false
+    type: bool
+    category: oidcConnect.users
+  oidcConnect.users.reEnableHidden:
+    default: false
+    type: bool
+    category: oidcConnect.users
+  oidcConnect.users.undelete:
+    default: false
+    type: bool
+    category: oidcConnect.users
+
+  # --- UI / Frontend plugin defaults --------------------------------------
+  oidcConnect.ui.loginPageId:
+    default: 0
+    type: page
+    category: oidcConnect.ui
+  oidcConnect.ui.logoutRedirectPageId:
+    default: 0
+    type: page
+    category: oidcConnect.ui
+
+# NOTE
+# Two structured pieces of settings are intentionally NOT declared here so
+# they remain YAML-only (not exposed in the Site Settings BE UI):
+#
+#   oidcConnect.mapping.<table>.<column>: <claim>
+#       Claim -> column mapping per record table (fe_users, be_users, ...).
+#
+#   oidcConnect.variants:
+#       Context-dependent overlays in baseVariants-style. Resolved at site-
+#       configuration load time by `ContextVariantResolver`; merged into the
+#       top-level `oidcConnect.*` keys before SiteSettings is built.

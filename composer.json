@@ -1,0 +1,31 @@
+{
+    "name": "wapplersystems/oidc-connect",
+    "type": "typo3-cms-extension",
+    "description": "TYPO3 v14 OpenID Connect integration driven entirely by site settings with context variants (dev/stage/prod overlays). Replaces causal/oidc + wapplersystems/oidc-addons.",
+    "license": ["GPL-2.0-or-later"],
+    "authors": [
+        {
+            "name": "Sven Wappler",
+            "homepage": "https://wappler.systems",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*",
+        "typo3/cms-core": "^14",
+        "typo3/cms-frontend": "^14",
+        "symfony/expression-language": "^7",
+        "league/oauth2-client": "^2.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "WapplerSystems\\OidcConnect\\": "Classes/"
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "oidc_connect"
+        }
+    }
+}
