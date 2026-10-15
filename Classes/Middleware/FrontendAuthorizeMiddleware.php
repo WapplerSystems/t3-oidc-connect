@@ -21,8 +21,9 @@ use WapplerSystems\OidcConnect\Http\SiteUrls;
 /**
  * `GET <authorize route>?redirect=<url>` starts the login: redirect to the
  * provider with state, nonce and PKCE. The return URL is validated against
- * the request host; without one, the Referer (same host) or the configured
- * after-login page is used.
+ * the request host; `redirect_url` is accepted as well. Without one, the
+ * Referer (same host, unwrapped if it is a login page with a return URL) or
+ * the configured after-login page is used.
  */
 final class FrontendAuthorizeMiddleware implements MiddlewareInterface, LoggerAwareInterface
 {
@@ -47,8 +48,7 @@ final class FrontendAuthorizeMiddleware implements MiddlewareInterface, LoggerAw
         $language = $request->getAttribute('language');
         $language = $language instanceof SiteLanguage ? $language : null;
         $query = $request->getQueryParams();
-        $returnUrl = SiteUrls::safeReturnUrl((string)($query['redirect'] ?? ''), $request)
-            ?: SiteUrls::safeReturnUrl($request->getHeaderLine('Referer'), $request)
+        $returnUrl = SiteUrls::requestedReturnUrl($request)
             ?: SiteUrls::defaultReturnUrl($site, $settings, $language);
 
         $extra = [];

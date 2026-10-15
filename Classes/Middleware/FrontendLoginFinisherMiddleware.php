@@ -11,10 +11,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\Http\RedirectResponse;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use TYPO3\CMS\Frontend\Controller\ErrorController;
 use WapplerSystems\OidcConnect\Authentication\VerifiedIdentity;
+use WapplerSystems\OidcConnect\Configuration\OidcConnectSettingsFactory;
 use WapplerSystems\OidcConnect\Http\SiteUrls;
 use WapplerSystems\OidcConnect\Session\SessionBindingRepository;
 
@@ -30,6 +32,7 @@ final class FrontendLoginFinisherMiddleware implements MiddlewareInterface, Logg
 
     public function __construct(
         private readonly SessionBindingRepository $bindings,
+        private readonly OidcConnectSettingsFactory $settingsFactory,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -55,7 +58,15 @@ final class FrontendLoginFinisherMiddleware implements MiddlewareInterface, Logg
         $bindingUid = $this->bindings->create($identity, (int)$user['uid']);
         $frontendUser->setAndSaveSessionData(SessionBindingRepository::SESSION_DATA_KEY, ['binding' => $bindingUid]);
 
-        $response = new RedirectResponse(SiteUrls::safeReturnUrl($identity->returnUrl, $request) ?: '/', 303);
-        return $response->withHeader('Cache-Control', 'no-store');
+        $response = (new RedirectResponse(SiteUrls::safeReturnUrl($identity->returnUrl, $request) ?: '/', 303))
+            ->withHeader('Cache-Control', 'no-store');
+        // Pages viewed before the login may sit in the browser cache in their
+        // logged-out state (TYPO3 sends max-age for anonymous visitors); the
+        // visitor would see them without the login until a hard reload.
+        $site = $request->getAttribute('site');
+        if ($site instanceof Site && $this->settingsFactory->forSite($site)->clearBrowserCache()) {
+            $response = $response->withHeader('Clear-Site-Data', '"cache"');
+        }
+        return $response;
     }
 }

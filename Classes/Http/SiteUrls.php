@@ -70,6 +70,44 @@ final class SiteUrls
     }
 
     /**
+     * The return URL a login request asks for, or '' if it names none.
+     *
+     * Reads `redirect` and, for links written for felogin or causal/oidc,
+     * `redirect_url`. Without either it falls back to the Referer, but a
+     * Referer that is itself a login page carrying one of these parameters
+     * (page → login page → authorize) is unwrapped, otherwise the visitor
+     * would land on the login page instead of where they started.
+     */
+    public static function requestedReturnUrl(ServerRequestInterface $request): string
+    {
+        $fromQuery = self::returnUrlFromQuery($request->getQueryParams(), $request);
+        if ($fromQuery !== '') {
+            return $fromQuery;
+        }
+
+        $referer = $request->getHeaderLine('Referer');
+        $refererQuery = [];
+        parse_str((string)parse_url($referer, PHP_URL_QUERY), $refererQuery);
+        if (self::safeReturnUrl($referer, $request) !== '') {
+            return self::returnUrlFromQuery($refererQuery, $request) ?: $referer;
+        }
+        return '';
+    }
+
+    private static function returnUrlFromQuery(array $query, ServerRequestInterface $request): string
+    {
+        foreach (['redirect', 'redirect_url'] as $name) {
+            if (is_string($query[$name] ?? null)) {
+                $url = self::safeReturnUrl($query[$name], $request);
+                if ($url !== '') {
+                    return $url;
+                }
+            }
+        }
+        return '';
+    }
+
+    /**
      * Where to go after login when the caller did not say: the configured
      * page, otherwise the site root.
      */

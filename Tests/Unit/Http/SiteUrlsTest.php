@@ -34,6 +34,37 @@ final class SiteUrlsTest extends UnitTestCase
         self::assertSame($expected, SiteUrls::safeReturnUrl($candidate, $request));
     }
 
+    public static function requestedReturnUrlProvider(): array
+    {
+        $loginPage = 'https://www.example.com/de/login/?redirect_url=' . rawurlencode('https://www.example.com/de/services/installation-center/');
+        return [
+            'redirect parameter' => ['/oidc/authorize?redirect=%2Fa%2F', '', '/a/'],
+            'redirect_url parameter (felogin, causal/oidc)' => ['/oidc/authorize?redirect_url=%2Fb%2F', '', '/b/'],
+            'redirect wins over redirect_url' => ['/oidc/authorize?redirect=%2Fa%2F&redirect_url=%2Fb%2F', '', '/a/'],
+            'foreign redirect falls back to Referer' => ['/oidc/authorize?redirect=https%3A%2F%2Fevil.example%2F', 'https://www.example.com/c/', 'https://www.example.com/c/'],
+            'plain Referer' => ['/oidc/authorize', 'https://www.example.com/c/', 'https://www.example.com/c/'],
+            'login page as Referer is unwrapped' => ['/oidc/authorize', $loginPage, 'https://www.example.com/de/services/installation-center/'],
+            'login page with foreign target stays on the Referer' => ['/oidc/authorize', 'https://www.example.com/de/login/?redirect_url=https%3A%2F%2Fevil.example%2F', 'https://www.example.com/de/login/?redirect_url=https%3A%2F%2Fevil.example%2F'],
+            'foreign Referer is ignored' => ['/oidc/authorize', 'https://evil.example/?redirect=%2Fx%2F', ''],
+            'nothing given' => ['/oidc/authorize', '', ''],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('requestedReturnUrlProvider')]
+    public function requestedReturnUrlReadsQueryThenUnwrapsReferer(string $path, string $referer, string $expected): void
+    {
+        $uri = 'https://www.example.com' . $path;
+        $query = [];
+        parse_str((string)parse_url($uri, PHP_URL_QUERY), $query);
+        $request = (new ServerRequest($uri))->withQueryParams($query);
+        if ($referer !== '') {
+            $request = $request->withHeader('Referer', $referer);
+        }
+
+        self::assertSame($expected, SiteUrls::requestedReturnUrl($request));
+    }
+
     #[Test]
     public function matchesRouteMatchesPathUnderLanguageBaseButNotPartialSegments(): void
     {
