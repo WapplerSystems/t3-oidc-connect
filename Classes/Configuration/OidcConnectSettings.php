@@ -211,11 +211,6 @@ final readonly class OidcConnectSettings
         return (int)$this->get('ui.errorPageId', 0);
     }
 
-    public function clearBrowserCache(): bool
-    {
-        return (bool)$this->get('ui.clearBrowserCache', true);
-    }
-
     // --- Raw access -------------------------------------------------------------
 
     /** @return array<string, mixed> */

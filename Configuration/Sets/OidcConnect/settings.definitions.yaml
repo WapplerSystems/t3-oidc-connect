@@ -151,10 +151,6 @@ settings:
     default: 0
     type: page
     category: oidcConnect.ui
-  oidcConnect.ui.clearBrowserCache:
-    default: true
-    type: bool
-    category: oidcConnect.ui
 
   # --- Backend login (uses the site selected in the extension configuration)
   oidcConnect.backend.enable:

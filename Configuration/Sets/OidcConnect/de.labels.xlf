@@ -271,14 +271,6 @@
                 <source>Page ID shown for login errors; receives the query parameter oidc_error=&lt;code&gt;. Default: 0 (not set).</source>
                 <target>Seiten-ID, die bei Anmeldefehlern angezeigt wird; erhält den Query-Parameter oidc_error=&lt;code&gt;. Standard: 0 (nicht gesetzt).</target>
             </trans-unit>
-            <trans-unit id="settings.oidcConnect.ui.clearBrowserCache">
-                <source>Clear browser cache on login/logout</source>
-                <target>Browser-Cache bei Anmeldung/Abmeldung leeren</target>
-            </trans-unit>
-            <trans-unit id="settings.description.oidcConnect.ui.clearBrowserCache">
-                <source>Sends Clear-Site-Data: &quot;cache&quot; with the redirect after login and logout, so pages the browser cached while logged out (or in) are not shown with the wrong login state. Cookies and storage are not touched.</source>
-                <target>Sendet Clear-Site-Data: &quot;cache&quot; mit der Weiterleitung nach Anmeldung und Abmeldung, damit der Browser keine Seiten mit falschem Anmeldestatus aus seinem Cache zeigt. Cookies und Speicher bleiben unberührt.</target>
-            </trans-unit>
             <trans-unit id="settings.oidcConnect.backend.enable">
                 <source>Enable backend login</source>
                 <target>Backend-Anmeldung aktivieren</target>

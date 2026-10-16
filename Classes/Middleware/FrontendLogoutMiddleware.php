@@ -62,12 +62,6 @@ final class FrontendLogoutMiddleware implements MiddlewareInterface
         if ($pending !== null && $pending['site'] === $site->getIdentifier()) {
             $target = $this->endSessionUrlBuilder->build($settings, $pending['idToken'], $postLogoutUrl);
         }
-        $response = (new RedirectResponse($target ?? $postLogoutUrl, 303))->withHeader('Cache-Control', 'no-store');
-        // Same as after login, the other way round: no page from the logged-in
-        // session may come back out of the browser cache.
-        if ($settings->clearBrowserCache()) {
-            $response = $response->withHeader('Clear-Site-Data', '"cache"');
-        }
-        return $response;
+        return (new RedirectResponse($target ?? $postLogoutUrl, 303))->withHeader('Cache-Control', 'no-store');
     }
 }
